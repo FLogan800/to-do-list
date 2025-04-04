@@ -1,6 +1,6 @@
 use rusqlite::Connection;
 
-use crate::task;
+use crate::cli;
 
 pub fn init() -> Connection {
     let conn = Connection::open("./tasks.db").unwrap();
@@ -10,7 +10,7 @@ pub fn init() -> Connection {
         id          INTEGER PRIMARY KEY,
         title       TEXT NOT NULL,
         description TEXT,
-        complete    BOOLEAN
+        complete    BOOLEAN DEFAULT 0
         )",
         (),
     )
@@ -19,11 +19,13 @@ pub fn init() -> Connection {
     conn
 }
 
-pub fn insert_task(conn: &Connection, task: task::Task) {
+pub fn insert_task(conn: &Connection, task: &cli::NewTask) {
+    let id = get_max_id(conn) + 1;
+
     conn.execute(
         "
-    INSERT INTO tasks (id, title, description, complete) VALUES (?1, ?2, ?3, ?4)",
-        (task.id, task.title, task.description, task.complete),
+    INSERT INTO tasks (id, title, description) VALUES (?1, ?2, ?3)",
+        (id, task.title.clone(), task.description.clone()),
     )
     .unwrap();
 }
@@ -50,9 +52,9 @@ pub fn get_max_id(conn: &Connection) -> i32 {
     let max_id: i32 = conn
         .query_row(
             "
-    SELECT COUNT(1) FROM tasks",
+    SELECT COALESCE(MAX(ID), 0) FROM tasks",
             (),
-        |r| r.get(0)
+            |r| r.get(0),
         )
         .unwrap();
 
