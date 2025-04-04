@@ -1,5 +1,6 @@
 mod cli;
 mod database;
+mod task;
 use clap::Parser;
 
 fn main() {
@@ -12,6 +13,14 @@ fn main() {
         cli::Commands::New(task) => database::insert_task(&conn, task),
         cli::Commands::Complete(task) => database::complete_task(&conn, task.id),
         cli::Commands::Delete(task) => database::delete_task(&conn, task.id),
-        cli::Commands::Display => todo!(),
+        cli::Commands::Display => display_tasks(&conn),
+    }
+}
+
+fn display_tasks(conn: &rusqlite::Connection) {
+    let tasks = database::fetch_tasks(conn);
+
+    for task in tasks {
+        println!("{}", task);
     }
 }
