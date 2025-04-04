@@ -4,11 +4,11 @@ use clap::{Args, Parser, Subcommand};
 #[command(version, about, next_line_help = true)]
 pub struct Cli {
     #[command(subcommand)]
-    command: Commands,
+    pub command: Commands,
 }
 
 #[derive(Subcommand)]
-enum Commands {
+pub enum Commands {
     /// Create a new task
     New(NewTask),
 
@@ -23,23 +23,23 @@ enum Commands {
 }
 
 #[derive(Args)]
-struct NewTask {
+pub struct NewTask {
     /// Task Title
-    title: String,
+    pub title: String,
 
     /// A Short Description
     #[arg(short, long)]
-    description: Option<String>,
+    pub description: Option<String>,
 }
 
 #[derive(Args)]
-struct CompleteTask {
+pub struct CompleteTask {
     /// Task ID
-    id: i32,
+    pub id: i32,
 }
 
 #[derive(Args)]
-struct DeleteTask {
+pub struct DeleteTask {
     /// Task ID
-    id: i32,
+    pub id: i32,
 }
