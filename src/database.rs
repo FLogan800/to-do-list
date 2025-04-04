@@ -42,7 +42,7 @@ pub fn complete_task(conn: &Connection, id: i32) {
 pub fn delete_task(conn: &Connection, id: i32) {
     conn.execute(
         "
-    DELETE tasks WEHRE id = ?1",
+    DELETE FROM tasks WHERE id = ?1",
         (id,),
     )
     .unwrap();
