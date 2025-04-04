@@ -4,18 +4,21 @@ pub struct Task {
     pub id: i32,
     pub title: String,
     pub description: Option<String>,
-    pub complete: bool,
+    pub is_complete: bool,
 }
 
 impl fmt::Display for Task {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "Title: {}\nID: {}\nDescription: {:?}\nComplete: {}\n",
+            "Title: {}\nID: {}\nDescription: {}\nIs Complete: {}\n",
             self.title,
             self.id,
-            self.description,
-            self.complete
+            match &self.description {
+                Some(description) => description,
+                None => "",
+            },
+            self.is_complete
         )
     }
 }
