@@ -1,7 +1,9 @@
 use crate::cli;
 use crate::task;
+use chrono::NaiveDate;
 use rusqlite::Connection;
 
+// Initilezes a database conenction and ensures a table exists
 pub fn init() -> Connection {
     let conn = Connection::open("./tasks.db").unwrap();
 
@@ -10,7 +12,8 @@ pub fn init() -> Connection {
         id          INTEGER PRIMARY KEY,
         title       TEXT NOT NULL,
         description TEXT,
-        is_complete    BOOLEAN DEFAULT 0
+        is_complete BOOLEAN DEFAULT 0,
+        due_date    TEXT
         )",
         (),
     )
@@ -19,17 +22,33 @@ pub fn init() -> Connection {
     conn
 }
 
+// Adds a new task into the database and assigns it a unique ID
 pub fn insert_task(conn: &Connection, task: &cli::NewTask) {
     let id = get_max_id(conn) + 1;
 
+    // Parse the due date string in the format "mm/dd/yyyy"
+    let due_date: Option<String> = match &task.due_date {
+        Some(date_str) => match NaiveDate::parse_from_str(date_str, "%m/%d/%Y") {
+            Ok(due_date) => Some(due_date.format("%m/%d/%Y").to_string()),
+            Err(_) => panic!("Invalid date format: {}", date_str),
+        },
+        None => None,
+    };
+
     conn.execute(
         "
-    INSERT INTO tasks (id, title, description) VALUES (?1, ?2, ?3)",
-        (id, task.title.clone(), task.description.clone()),
+    INSERT INTO tasks (id, title, description, due_date) VALUES (?1, ?2, ?3, ?4)",
+        (
+            id,
+            task.title.clone(),
+            task.description.clone(),
+            due_date,
+        ),
     )
     .unwrap();
 }
 
+// Marks a task complete by ID
 pub fn complete_task(conn: &Connection, id: i32) {
     conn.execute(
         "
@@ -39,6 +58,7 @@ pub fn complete_task(conn: &Connection, id: i32) {
     .unwrap();
 }
 
+// Completely removes a task from the database
 pub fn delete_task(conn: &Connection, id: i32) {
     conn.execute(
         "
@@ -48,6 +68,7 @@ pub fn delete_task(conn: &Connection, id: i32) {
     .unwrap();
 }
 
+// Gets the highest task ID from the database
 pub fn get_max_id(conn: &Connection) -> i32 {
     let max_id: i32 = conn
         .query_row(
@@ -61,6 +82,7 @@ pub fn get_max_id(conn: &Connection) -> i32 {
     max_id
 }
 
+// Fetches all tasks from the database and returns them in a vector
 pub fn fetch_tasks(conn: &Connection) -> Vec<task::Task> {
     let mut tasks = conn.prepare("SELECT * FROM tasks").unwrap();
 
@@ -71,6 +93,10 @@ pub fn fetch_tasks(conn: &Connection) -> Vec<task::Task> {
                 title: row.get(1)?,
                 description: row.get(2)?,
                 is_complete: row.get(3)?,
+                due_date: {
+                    let date_str: String = row.get(4)?;
+                    NaiveDate::parse_from_str(&date_str, "%m/%d/%Y").ok()
+                },
             })
         })
         .unwrap();

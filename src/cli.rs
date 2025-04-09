@@ -30,6 +30,10 @@ pub struct NewTask {
     /// A Short Description
     #[arg(short, long)]
     pub description: Option<String>,
+
+    /// Task Due Date (mm/dd/yyyy)
+    #[arg(short = 'u', long)]
+    pub due_date: Option<String>,
 }
 
 #[derive(Args)]
