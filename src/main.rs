@@ -12,8 +12,9 @@ fn main() {
     match command {
         cli::Commands::New(task) => database::insert_task(&conn, task),
         cli::Commands::Complete(task) => database::complete_task(&conn, task.id),
+        cli::Commands::Incomplete(task) => database::uncomplete_task(&conn, task.id),
         cli::Commands::Delete(task) => database::delete_task(&conn, task.id),
-        cli::Commands::Display => display_tasks(&conn),
+        cli::Commands::Display(_) => display_tasks(&conn),
     }
 }
 

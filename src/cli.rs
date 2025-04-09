@@ -15,11 +15,14 @@ pub enum Commands {
     /// Complete a task by ID
     Complete(CompleteTask),
 
+    /// Mark a task incomplete by ID
+    Incomplete(IncompleteTask),
+
     /// Delete a task by ID
     Delete(DeleteTask),
 
     /// Display all tasks
-    Display,
+    Display(DisplayTasks),
 }
 
 #[derive(Args)]
@@ -30,6 +33,10 @@ pub struct NewTask {
     /// A Short Description
     #[arg(short, long)]
     pub description: Option<String>,
+
+    /// Task Priority
+    #[arg(short, long, default_value_t = 1)]
+    pub priority: i32,
 
     /// Task Due Date (mm/dd/yyyy)
     #[arg(short = 'u', long)]
@@ -43,7 +50,16 @@ pub struct CompleteTask {
 }
 
 #[derive(Args)]
+pub struct IncompleteTask {
+    /// Task ID
+    pub id: i32,
+}
+
+#[derive(Args)]
 pub struct DeleteTask {
     /// Task ID
     pub id: i32,
 }
+
+#[derive(Args)]
+pub struct DisplayTasks {}

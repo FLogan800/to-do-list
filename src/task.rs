@@ -6,6 +6,7 @@ pub struct Task {
     pub id: i32,
     pub title: String,
     pub description: Option<String>,
+    pub priority: i32,
     pub is_complete: bool,
     pub due_date: Option<NaiveDate>,
 }
@@ -14,9 +15,10 @@ impl fmt::Display for Task {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "Title: {}\nID: {}\nDescription: {}\nIs Complete: {}\nDue Date: {}\n",
+            "Title: {}\nID: {}\nPriority: {}\nDescription: {}\nCompleted: {}\nDue Date: {}\n",
             self.title,
             self.id,
+            self.priority,
             match &self.description {
                 Some(description) => description,
                 None => "",

@@ -12,6 +12,7 @@ pub fn init() -> Connection {
         id          INTEGER PRIMARY KEY,
         title       TEXT NOT NULL,
         description TEXT,
+        priority    INTEGER DEFAULT 1,
         is_complete BOOLEAN DEFAULT 0,
         due_date    TEXT
         )",
@@ -37,11 +38,12 @@ pub fn insert_task(conn: &Connection, task: &cli::NewTask) {
 
     conn.execute(
         "
-    INSERT INTO tasks (id, title, description, due_date) VALUES (?1, ?2, ?3, ?4)",
+    INSERT INTO tasks (id, title, description, priority, due_date) VALUES (?1, ?2, ?3, ?4, ?5)",
         (
             id,
             task.title.clone(),
             task.description.clone(),
+            task.priority,
             due_date,
         ),
     )
@@ -53,6 +55,16 @@ pub fn complete_task(conn: &Connection, id: i32) {
     conn.execute(
         "
         UPDATE tasks SET is_complete = 1 WHERE id = ?1",
+        (id,),
+    )
+    .unwrap();
+}
+
+// Marks a task complete by ID
+pub fn uncomplete_task(conn: &Connection, id: i32) {
+    conn.execute(
+        "
+        UPDATE tasks SET is_complete = 0 WHERE id = ?1",
         (id,),
     )
     .unwrap();
@@ -92,10 +104,18 @@ pub fn fetch_tasks(conn: &Connection) -> Vec<task::Task> {
                 id: row.get(0)?,
                 title: row.get(1)?,
                 description: row.get(2)?,
-                is_complete: row.get(3)?,
+                priority: row.get(3)?,
+                is_complete: row.get(4)?,
                 due_date: {
-                    let date_str: String = row.get(4)?;
-                    NaiveDate::parse_from_str(&date_str, "%m/%d/%Y").ok()
+                    let date_str: Option<String> = row.get(5)?;
+
+                    match date_str {
+                        Some(date_str) => match NaiveDate::parse_from_str(&date_str, "%m/%d/%Y") {
+                            Ok(due_date) => Some(due_date),
+                            Err(_) => None,
+                        },
+                        None => None,
+                    }
                 },
             })
         })
