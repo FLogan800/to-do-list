@@ -14,7 +14,7 @@ pub fn init() -> Connection {
         description TEXT,
         priority    INTEGER DEFAULT 1,
         is_complete BOOLEAN DEFAULT 0,
-        due_date    TEXT
+        due_date    DATE
         )",
         (),
     )

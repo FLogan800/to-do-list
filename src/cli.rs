@@ -62,4 +62,20 @@ pub struct DeleteTask {
 }
 
 #[derive(Args)]
-pub struct DisplayTasks {}
+pub struct DisplayTasks {
+    /// Show only incomplete tasks
+    #[arg(short, long, group = "filter")]
+    pub incomplete: bool,
+
+    /// Show only complete tasks
+    #[arg(short, long, group = "filter")]
+    pub complete: bool,
+
+    /// Sort tasks by priority
+    #[arg(short, long)]
+    pub priority: bool,
+
+    /// Sort tasks by due date
+    #[arg(short, long)]
+    pub due_date: bool,
+}
